@@ -1,0 +1,187 @@
+#+TITLE: Functional Programming in Scala (Coursera)
+
+* Week 4: Types and Pattern Matching
+
+** Is Scala a pure object-oriented language?
+
+Types such as ~Int~ or ~Boolean~ do not receive special treatment in Scala. They are like the other classes, defined in the package ~Scala~.
+
+For reasons of efficiency, the Scala compiler represents the values of type ~Scala.Int~ by 32-bit integers, and the value of type ~scala.Boolean~ by Java's Boolean, etc.
+
+Function values are treated as objects in Scala. They are objects with ~apply~ methods.
+
+The function type ~A => B~ is just an abbreviation for the class ~scala.Function1[A, B]~. There are also traits ~Function2~, ~Function3~, ... for functions which take more parameters (current up to 22).
+
+** How Scala Expand Function Values
+
+An anonymous function such as
+
+#+begin_src scala
+(x: Int) => x * x
+#+end_src
+
+is expanded to
+
+#+begin_src scala
+{
+  class AnonFun extends Function1[Int, Int] {
+    def apply(x: Int) = x * x
+  }
+  new AnonFun
+}
+#+end_src
+
+or, shorter, using /anonymous/ class syntax:
+
+#+begin_src scala
+new Function1[Int, Int] {
+  def apply(x: Int) = x *x
+}
+#+end_src
+
+** How Scala Expand Function Calls
+
+A function call, such as ~f(a, b)~, where ~f~ is a value of some class type, is expanded to
+
+#+begin_src scala
+f.apply(a, b)
+#+end_src
+
+** Functions and Methods (Eta-expansion)
+
+The OO-translation of
+
+#+begin_src scala
+val f = (x: Int) => x * x
+f(7)
+#+end_src
+
+would be
+
+#+begin_src scala
+val f = new Function1[Int, Int] {
+  def apply(x: Int) = x * x
+}
+f.apply(7)
+#+end_src
+
+However, if the function call ~apply(x: Int)~ is an object, it is an instance of ~Function1[Int, Int]~. We wold get an infinite expansion.
+
+What happens instead is that anything that's defined with a ~def~ are *not* function values. But if the name of a method is used in a place where a function type is expected, is's converted automatically to the function value.
+
+For example, a method such as
+
+#+begin_src scala
+def f(x: Int): Boolean = ...
+#+end_src
+
+is not itself a function value. If ~f~ is used in a place where a Function type is required, it is converted to a function value.
+
+#+begin_src scala
+(x: Int) => f(x)
+#+end_src
+
+or, expanded
+
+#+begin_src scala
+new Function1[Int, Boolean] {
+  def apply(x: Int) = f(x)
+}
+#+end_src
+
+The above technique is called =eta-expansion=.
+
+** What's Liscov Substitution Principle?
+
+If ~S~ is a subtype of ~T~, then objects of type ~T~ may be replaced with objects of type ~S~ without altering any of the desirable properties of the program.
+
+** TODO What's Bounds and Varience?
+
+Subtyping, where we can pass instances of a subtype where a base type was required. And, generics, where we can parameterize types with other types.
+
+Variance refers as how subtyping between complex types relates to subtypes of their components. Scala supports variances annotations of type parameters of a generic class.
+
+- [[https://www.journaldev.com/8924/scala-variances-upper-type-bounds-and-lower-type-bounds][Scala Variances, Upper type Bounds and Lower type bounds]]
+
+** TODO What's Lower Bounds, Upper Bounds, and Mixed Bounds?
+
+** What's Covariance?
+
+Given ~S <: T~, we get ~List[S] <: List[T]~.
+
+We call types for which this relationship holds /covariant/ because their subtyping relationship varies with the type parameter.
+
+But, in Scala, arrays are *not* covariant.
+
+** TODO Why Arrays Are Not Covariant in Scala?
+
+Roughly speaking, a type that accepts mutation of its elements should not be covariant. But immutable types can be covariant, if some conditions on methods are met.
+
+** What's Covariant, Contravariant, and Nonvariant?
+
+Say ~C[T]~ is a parameterized type and ~A~, ~B~ are types such that ~A <: B~. In general, there are three possible relationship between ~C[A]~ and ~C[B]~.
+
+- covariant :: ~C[A] <: C[B]~
+- contravariant :: ~C[A] :> C[B]~
+- nonvariant :: neither ~C[A]~ nor ~C[B]~ is a subtype of the other
+
+Scala lets you declare the variance of a type by annotating the type parameter:
+
+- covariant :: ~class C[+A]~
+- contravariant :: ~class C[-A]~
+- nonvariant :: ~class[A]~
+
+** What's the Typing Rules for Functions?
+
+Generally, we have the following rule for subtyping between function types:
+
+If ~A2 <: A1~ and ~B1 <: B2~, then ~A1 => B1 <: A2 => B2~.
+
+So functions are /contravarant/ in their argument types(s) and /covariant/ in their result type. Visually:
+
+#+begin_example
+A1     B2     (A1) => B2
+^      ^           |
+|      |           V
+A2     B1     (A2) => B1
+#+end_example
+
+This leads to the following revised definition of the ~Function1~ trait:
+
+#+begin_src scala
+trait Function1[-T, +U] {
+  def apply(x: T): U
+}
+#+end_src
+
+Put another way, if ~F1 <: F2~, the parameter types are ~P1 :> P2~, and the result types are ~R1 :< R2~. The function of subtype can accept super-type values, but output sub-type values. (A subtype accepts loosely, outputs strictly).
+
+** TODO How Scala checks variances?
+
+For function traits:
+- covariant type parameters can only appear in method results.
+- contravarant type parameters can only appear in method parameters.
+- invariant type parameters can appear anywhere
+
+Covariant types parameters may appear in lower bounds of method type parameters.
+Contravariant type parameters may appear in upper bounds of method.
+
+https://www.coursera.org/learn/progfun1/lecture/dnreZ/lecture-4-4-variance-optional
+
+** TODO Why Pattern Matching Is a Better Way of Decompsition?
+
+** TODO Compare examples of diff solutions
+
+no need to take notes though, but want to understand details
+
+https://www.coursera.org/learn/progfun1/lecture/cdHAM/lecture-4-6-pattern-matching
+
+* Week 5: Reduction of Lists
+
+** What's Natural Induction and Structual Induction
+
+
+
+** What's Referential Transparency
+
+* Week 6:

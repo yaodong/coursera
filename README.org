@@ -178,10 +178,49 @@ https://www.coursera.org/learn/progfun1/lecture/cdHAM/lecture-4-6-pattern-matchi
 
 * Week 5: Reduction of Lists
 
-** What's Natural Induction and Structual Induction
+** TODO What's Natural Induction and Structual Induction
 
-
-
-** What's Referential Transparency
+** TODO What's Referential Transparency
 
 * Week 6:
+
+** What's the difference between Vectors and Lists.
+
+Lists are linear: access to the first element is much faster than access to the middle or end of the list.
+
+~Vector~ has more evenly balanced access patterns than ~List~.
+
+Because vectors strike a good balance between fast random selections and fast random functional updates, they are currently the default implementation of immutable indexed sequences.
+
++ [[https://alvinalexander.com/scala/make-vector-class-default-immutable-sequence-scala-cookbook/][Make the Scala Vector class your default immutable sequence]]
++ [[https://stackoverflow.com/questions/6928327/when-should-i-choose-vector-in-scala][When should I choose Vector in Scala?]]
+
+** How For-expressions simplify ~map~, ~flatMap~ or ~filter~?
+
+The for-expression is similar to loops in imperative languages, except that it builds a list of the results of all iterations.
+
+A for-expression is of the form
+
+#+begin_src scala
+for (s) yield e
+#+end_src
+
+where ~s~ is a sequence of ~generators~ and ~filters~, and ~e~ is an expression whose value is returned by an iteration.
+
++ A ~generator~ is of the form ~p <- e~, where ~p~ is a pattern and ~e~ an expression whose value is a collection.
++ A ~filter~ is of the form ~if f~ where ~f~ is a boolean expression.
++ The sequence must start with a generator.
++ If there are several generators in the sequence, the last generators very faster than the first.
+
+An example: given a positive integer ~n~, find all the pairs of ~(i, j)~ such that ~1 <= j < i < n~ and ~i + j~ is prime.
+
+#+begin_src scala
+for {
+  i <- 1 to n
+  j <- 1 to i
+  if isPrime(i + j)
+} yield (i, j)
+#+end_src
+
++ [[https://alvinalexander.com/scala/how-to-use-multiple-generators-scala-for-expressions-loops/][How to use multiple generators in Scala ‘for’ expressions (loops)]]
+
